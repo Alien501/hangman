@@ -19,6 +19,7 @@ const resources = {
       },
       toast: {
         correct: 'Correct!',
+        correctDescription: 'is in word',
         wrong: 'Wrong!',
         wrongDescription: 'is not in the word',
         gameOver: 'Game over!',
