@@ -13,14 +13,15 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
-    allowedHosts: ['1e95d8aac1fa.ngrok-free.app']
+    allowedHosts: ['*'],
   },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-  },
+  // test: {
+  //   globals: true,
+  //   environment: 'jsdom',
+  // },
   resolve: {
     alias: {
+      // @ts-nocheck
       '@': resolve(__dirname, './src'),
     },
   },

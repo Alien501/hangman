@@ -1,5 +1,5 @@
 import { HangBox, HangFrame, HangRope } from '../sprites/assets'
-import { HangExecutor } from '../sprites/stick-mans';
+import { HangExecutor } from '../sprites/stick-mans'
 
 const InitialScene = ({
   currentStickMan,
@@ -48,5 +48,4 @@ const InitialScene = ({
   )
 }
 
-
-export default InitialScene;
+export default InitialScene

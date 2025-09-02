@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
 import gsap from 'gsap'
-import { useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 
 export default function HomeScreen({ onStart }: { onStart: () => void }) {
+  const { t } = useTranslation()
+
   useEffect(() => {
     gsap.set('#sprite-wrapper', {
       scale: 1.5,
@@ -51,11 +53,11 @@ export default function HomeScreen({ onStart }: { onStart: () => void }) {
   }, [])
 
   return (
-    <div className="h-full w-full relative">
+    <div className="h-full w-full relative font-open-sans">
       <div className="home-scene-container relative h-full w-full">
-        <div className="lg:w-[400px] w-[320px] h-[400px] mx-auto border-4 border-black rounded-md absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div className="lg:w-[400px] w-[320px] h-[400px] mx-auto border-4 border-black shadow-[4px_4px_0px_#000] absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <p className="font-bold text-5xl text-center absolute left-0 right-0 bottom-0 bg-foreground text-background p-2">
-            தொங்கும் மனிதன்
+            {t('app.title')}
           </p>
           <svg
             width="100%"
@@ -147,12 +149,12 @@ export default function HomeScreen({ onStart }: { onStart: () => void }) {
           </svg>
         </div>
       </div>
-      <div className="absolute lg:bottom-24 bottom-8  w-full left-0 right-0">
+      <div className="absolute lg:bottom-24 bottom-8  w-full left-0 right-0 top-10">
         <Button
           onClick={onStart}
-          className="font-indie mx-auto text-3xl block w-[128px] h-[64px] rounded-none leading-tight"
+          className="font-indie flex justify-center items-center mx-auto text-xl block w-[128px] h-[64px] rounded-none leading-tight"
         >
-          Start
+          <span>{t('home.start')}</span>
         </Button>
       </div>
     </div>

@@ -9,6 +9,16 @@
   src: url('../public/assets/fonts/IndieFlower.ttf');
 }
 
+@font-face {
+  font-family: 'Noto Sans';
+  src: url('../public/assets/fonts/noto-sans.ttf');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url('../public/assets/fonts/open-sans.ttf');
+}
+
 body {
   @apply m-0;
   font-family:
@@ -132,18 +142,21 @@ code {
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --font-indie: 'Indie Flower';
+  --font-noto-sans: 'Noto Sans';
+  --font-open-sans: 'Open Sans';
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    font-family: 'Open Sans', sans-serif;
   }
   body {
     @apply bg-background text-foreground;
   }
 }
 
-/* From Uiverse.io by arthur_6104 */ 
+/* From Uiverse.io by arthur_6104 */
 .box-button {
   width: 64px;
   cursor: pointer;
@@ -176,11 +189,11 @@ code {
 }
 
 .box-button-tick.active {
-  background-color: #D40C00;
+  background-color: #d40c00;
 }
 
 .btn-uyir {
-  background-color: #00A5F9;
+  background-color: #00a5f9;
 }
 
 .btn-uyir .button {
@@ -188,7 +201,7 @@ code {
 }
 
 .btn-mei {
-  background-color: #32C12C;
+  background-color: #32c12c;
 }
 
 .btn-mei .button {
@@ -196,29 +209,43 @@ code {
 }
 
 .btn-mei.pressed {
-  background-color: #FF5500;
+  background-color: #ff5500;
 }
 
 .btn-mei.pressed .button {
-  background-color: #FF9A00;
+  background-color: #ff9a00;
 }
 
 .btn-uyir.pressed {
-  background-color: #50342C;
+  background-color: #50342c;
 }
 
 .btn-uyir.pressed .button {
-  background-color: #7C5547;
+  background-color: #7c5547;
   color: #fff;
 }
 
-@media screen and (max-width: 560px){
+@media screen and (max-width: 560px) {
   .box-button {
-    width: 44px;
-    font-size: 12px;
+    width: 32px;
+    cursor: pointer;
+    border: 2px solid black;
+    padding-bottom: 5px;
   }
 
-  /* #game-scene-container {
-    height: 300px;
-  } */
+  .button {
+    border: 2px solid #fff;
+    padding: 3px 8px;
+  }
+
+  .button span {
+    font-size: 0.8em;
+    letter-spacing: 0.5px;
+  }
+
+  .box-button:active {
+    padding: 0;
+    margin-bottom: 5px;
+    transform: translateY(5px);
+  }
 }

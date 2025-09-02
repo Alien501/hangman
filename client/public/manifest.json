@@ -1,6 +1,6 @@
 {
-  "short_name": "TanStack App",
-  "name": "Create TanStack App Sample",
+  "short_name": "Hangman - Tamil",
+  "name": "Hangman Game with Tamil Words",
   "icons": [
     {
       "src": "favicon.ico",
