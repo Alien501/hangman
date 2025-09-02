@@ -11,44 +11,14 @@ import {
 import InitialScene from './scene'
 import { Button } from '@/components/ui/button'
 import Keyboard from '@/components/keyboard'
+import { toast } from 'sonner'
 
 export default function GameScreen() {
-  const getWord = async () => {
-    try {
-      const wordResponse = await fetch('https://api.tamilwords.net/');
-      if(wordResponse.ok) {
-        const data = await wordResponse.json();
-        const segmenter = new Intl.Segmenter('ta', { granularity: 'grapheme' });
-        const segments = segmenter.segment(data[0].tamilword);
-        const graphemes = Array.from(segments, segment => segment.segment);
-        
-        setWord(graphemes);
-        return data;
-      }
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
-  }
-
-  const { data } = useQuery({
-    queryKey: ['word'],
-    queryFn: getWord,
-  });
-  
-  const [word, setWord] = useState<Array<string> | null>([]);
-  const [currentStickMan, setCurrentStickMan] = useState(<HappyStickMan />)
-  const [currentGameState, setCurrentGameState] = useState<string>('p0')
-  const [gamePlayTimeline, setGamePlayTimeline] = useState<gsap.core.Timeline | null>(null);
-  const [userWord, setUserWord] = useState('');
-  const [meiyezhuthuPressed, setMeiyezhuthuPressed] = useState<number | null>(null);
-  const [uyirezhuthuPressed, setUyirezhuthuPressed] = useState<number | null>(null);
-
-
-  const uyirEzhuthu = ["அ","ஆ","இ","ஈ","உ","ஊ","எ","ஏ","ஐ","ஒ","ஓ","ஔ"]
-  const meiyezhuthu = ['க்', 'ங்', 'ச்', 'ஞ்', 'ட்', 'ண்', 'த்', 'ந்', 'ப்', 'ம்', 'ய்', 'ர்', 'ல்', 'வ்', 'ழ்', 'ள்', 'ற்', 'ன்']
-  const uyirMeiyeazhuthu = 
-  {
+  // Types for Tamil consonant/vowel composition
+  const uyirEzhuthu = ["அ","ஆ","இ","ஈ","உ","ஊ","எ","ஏ","ஐ","ஒ","ஓ","ஔ"] as const
+  const meiyezhuthu = ['க்', 'ங்', 'ச்', 'ஞ்', 'ட்', 'ண்', 'த்', 'ந்', 'ப்', 'ம்', 'ய்', 'ர்', 'ல்', 'வ்', 'ழ்', 'ள்', 'ற்', 'ன்'] as const
+  type MeiKey = typeof meiyezhuthu[number]
+  const uyirMeiyeazhuthu: Record<MeiKey, ReadonlyArray<string>> = {
     "க்": ["க","கா","கி","கீ","கு","கூ","கெ","கே","கை","கொ","கோ","கௌ"],
     "ங்": ["ங","ஙா","ஙி","ஙீ","ஙு","ஙூ","ஙெ","ஙே","ஙை","ஙொ","ஙோ","ஙௌ"],
     "ச்": ["ச","சா","சி","சீ","சு","சூ","செ","சே","சை","சொ","சோ","சௌ"],
@@ -67,6 +37,149 @@ export default function GameScreen() {
     "ள்": ["ள","ளா","ளி","ளீ","ளு","ளூ","ளெ","ளே","ளை","ளொ","ளோ","ளௌ"],
     "ற்": ["ற","றா","றி","றீ","று","றூ","றெ","றே","றை","றொ","றோ","றௌ"],
     "ன்": ["ன","னா","னி","னீ","னு","னூ","னெ","னே","னை","னொ","னோ","னௌ"]
+  } as const
+  const getWord = async () => {
+    try {
+      const wordResponse = await fetch('https://api.tamilwords.net/');
+      if(wordResponse.ok) {
+        const data = await wordResponse.json();
+        const segmenter = new Intl.Segmenter('ta', { granularity: 'grapheme' });
+        const segments = segmenter.segment(data[0].tamilword);
+        const graphemes = Array.from(segments, segment => segment.segment);
+        
+        setWord(graphemes);
+        return data;
+      }
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  const { data, refetch } = useQuery({
+    queryKey: ['word'],
+    queryFn: getWord,
+  });
+  
+  const [word, setWord] = useState<Array<string> | null>([]);
+  const [currentStickMan, setCurrentStickMan] = useState(<HappyStickMan />)
+  const [currentGameState, setCurrentGameState] = useState<string>('p0')
+  const [gamePlayTimeline, setGamePlayTimeline] = useState<gsap.core.Timeline | null>(null);
+  const [userWord, setUserWord] = useState('');
+  const [meiyezhuthuPressed, setMeiyezhuthuPressed] = useState<number | null>(null);
+  const [uyirezhuthuPressed, setUyirezhuthuPressed] = useState<number | null>(null);
+  const [guessedGraphemes, setGuessedGraphemes] = useState<string[]>([])
+  const [errors, setErrors] = useState<number>(0)
+  const [score, setScore] = useState<number>(0)
+  const [isGameOver, setIsGameOver] = useState<boolean>(false)
+ 
+  const getPlayableLength = (arr: Array<string> | null) => (arr ? arr.filter(ch => ch !== ' ').length : 0)
+
+
+  const setTimelineForErrorCount = (errorCount: number) => {
+    const states = ['p0','p25','p50','p75','p100'] as const
+    const maxErrors = word ? getPlayableLength(word) + 1 : 5
+
+    if (errorCount <= 0) {
+      setCurrentGameState('p0')
+      return
+    }
+
+    if (errorCount >= maxErrors) {
+      setCurrentGameState('p100')
+      return
+    }
+
+    const steps = 3 // p25, p50, p75
+    const denom = Math.max(1, maxErrors - 1)
+    const ratio = errorCount / denom
+    const band = Math.min(steps, Math.max(1, Math.ceil(ratio * steps)))
+
+    switch (band) {
+      case 1:
+        setCurrentGameState('p25')
+        break
+      case 2:
+        setCurrentGameState('p50')
+        break
+      case 3:
+      default:
+        setCurrentGameState('p75')
+        break
+    }
+  }
+
+  const resetGame = () => {
+    setGuessedGraphemes([])
+    setErrors(0)
+    setIsGameOver(false)
+    setMeiyezhuthuPressed(null)
+    setUyirezhuthuPressed(null)
+    setTimelineForErrorCount(0)
+    refetch()
+  }
+
+  const revealWord = () => {
+    if (!word) return
+    const unique = Array.from(new Set(word))
+    setGuessedGraphemes(unique)
+  }
+
+  const handleGameOverIfNeeded = (nextErrors: number) => {
+    const maxErrors = word ? getPlayableLength(word) + 1 : 5
+    if (nextErrors >= maxErrors) {
+      revealWord()
+      setIsGameOver(true)
+      toast.error('Game over!', {
+        description: 'You have used all moves. Start a new game?',
+        action: {
+          label: 'Restart',
+          onClick: () => resetGame(),
+        },
+        position: 'top-center'
+      })
+    }
+  }
+
+  const submitGuess = (chosen: string) => {
+    if(!chosen || !word || isGameOver) return
+    if(guessedGraphemes.includes(chosen)) return
+
+    const isHit = word.some(g => g === chosen)
+    if(isHit) {
+      const nextGuessed = [...guessedGraphemes, chosen]
+      setGuessedGraphemes(nextGuessed)
+      toast.success('Correct!', { description: `"${chosen}" is in the word.`, position: 'top-center' })
+
+      const nonSpaceWord = word.filter(g => g !== ' ')
+      const isComplete = nonSpaceWord.every(g => nextGuessed.includes(g))
+      if(isComplete) {
+        setScore(prev => prev + 1)
+        setErrors(prev => {
+          const next = Math.max(0, prev - 1)
+          setTimelineForErrorCount(next)
+          return next
+        })
+        setGuessedGraphemes([])
+        setMeiyezhuthuPressed(null)
+        setUyirezhuthuPressed(null)
+        toast.success('You guessed the word!', {
+          description: 'Fetching a new word...',
+          position: 'top-center'
+        })
+        refetch()
+      }
+    } else {
+      setErrors(prev => {
+        const next = prev + 1
+        setTimelineForErrorCount(next)
+        handleGameOverIfNeeded(next)
+        return next
+      })
+      toast.error('Wrong!', { description: `"${chosen}" is not in the word.`, position: 'top-center' })
+      setMeiyezhuthuPressed(null)
+      setUyirezhuthuPressed(null)
+    }
   }
 
   // Function to initialize/reset the scene to its initial state
@@ -293,12 +406,15 @@ export default function GameScreen() {
 
   const onUyirEzhuthuPressed = (value: number) => {
     if(meiyezhuthuPressed || meiyezhuthuPressed == 0) {
+      // Selecting Uyir together with a Mei → requires confirmation
       if(uyirezhuthuPressed == value) setUyirezhuthuPressed(null);
       else {
         setUyirezhuthuPressed(value);
       }
-    }else {
-      setUserWord(prev => prev);
+    } else {
+      // Uyir alone is a direct input (submit immediately)
+      const chosen = uyirEzhuthu[value]
+      submitGuess(chosen)
     }
   }
   
@@ -313,38 +429,59 @@ export default function GameScreen() {
   }
 
   const onConfirmPressed = () => {
-    if((meiyezhuthuPressed || meiyezhuthuPressed == 0) && (uyirezhuthuPressed || uyirezhuthuPressed == 0)) {
-      const ui = uyirMeiyeazhuthu[meiyezhuthu[meiyezhuthuPressed]][uyirezhuthuPressed];
-    }else {
-      if(meiyezhuthuPressed == null) return;
-      const ui = meiyezhuthu[meiyezhuthuPressed];
+    // Allow either Mei alone, or composed UyirMei. Uyir alone is handled on click.
+    if(meiyezhuthuPressed || meiyezhuthuPressed === 0) {
+      const mei = meiyezhuthu[(meiyezhuthuPressed as number)] as MeiKey
+      if(uyirezhuthuPressed || uyirezhuthuPressed === 0) {
+        const chosen = uyirMeiyeazhuthu[mei][(uyirezhuthuPressed as number)] || null
+        if (!chosen) return
+        submitGuess(chosen)
+      } else {
+        // Submit Mei alone
+        submitGuess(mei)
+      }
     }
   }
 
   return (
     <div className="h-full w-full flex justify-evenly lg:flex-row flex-col">
       <div className="h-full w-full flex justify-center items-center bg-blue-200/0 relative">
-        <div className="flex flex-col gap-2 absolute top-4">
+        <div className="flex flex-col gap-2 absolute top-4 lg:top-10 z-10">
           <div className='flex items-center justify-center space-x-2 flex-wrap p-4'>
             {
-              word?.map(w =>
-              <div className="answer-box shadow-[4px_4px_0px_#000] w-[40px] h-[40px] border-2 border-black p-0.5 flex items-center justify-center relative">
-                <span className='absolute h-[90%] w-[90%] bg-red-400'>{w}</span>
-              </div>)
+              word?.map((w, i) => (
+                w === ' ' ? (
+                  <div key={i} className="w-[20px]" />
+                ) : (
+                  <div key={i} className="answer-box shadow-[4px_4px_0px_#000] w-[40px] h-[40px] border-2 border-black p-0.5 flex items-center justify-center relative">
+                    <span className={`absolute h-[90%] w-[90%] ${guessedGraphemes.includes(w) ? 'bg-green-400' : 'bg-red-400'}`}>{guessedGraphemes.includes(w) ? w : ''}</span>
+                  </div>
+                )
+              ))
             }
           </div>
         </div>
         <div
           id="game-scene-container"
-          className="flex justify-center items-center overflow-hidden max-h-[360px] max-w-[400px] p-2 border-4 border-black shadow-[4px_4px_0px_#000]"
+          className="relative z-0 flex justify-center items-center overflow-hidden lg:w-[400px] lg:h-[400px] sm:h-[240px] sm:w-[320px] p-2 border-4 border-black shadow-[4px_4px_0px_#000]"
         >
+          <div className='absolute right-2 lg:top-1 bg-green-300 border-3 shadow-[4px_4px_0px_#000] border-black py-2 px-2 font-bold'>
+            {word ? `Moves: ${errors}/${getPlayableLength(word) + 1}` : ''}
+          </div>
           <InitialScene currentStickMan={currentStickMan} />
         </div>
       </div>
       <div className="h-full w-full p-4 bg-red-200/0 flex justify-center items-center flex-col">
+        <div className="mb-2 text-sm">
+          {(meiyezhuthuPressed || meiyezhuthuPressed === 0) ? (
+            (uyirezhuthuPressed || uyirezhuthuPressed === 0)
+              ? `${uyirMeiyeazhuthu[meiyezhuthu[meiyezhuthuPressed as number] as MeiKey][uyirezhuthuPressed as number]}`
+              : `${meiyezhuthu[meiyezhuthuPressed as number]}`
+          ) : ''}
+        </div>
         <Keyboard
-          uyirEzhuthu={uyirEzhuthu}
-          meiyezhuthu={meiyezhuthu}
+          uyirEzhuthu={[...uyirEzhuthu]}
+          meiyezhuthu={[...meiyezhuthu]}
           onUyirEzhuthuPressed={onUyirEzhuthuPressed}
           onMeiyezhuthuPressed={onMeiyezhuthuPressed}
           uyirezhuthuPressed={uyirezhuthuPressed}

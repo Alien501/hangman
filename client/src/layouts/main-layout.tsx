@@ -1,4 +1,6 @@
 import Header from '@/components/Header'
+import { Toaster } from "@/components/ui/sonner"
+
 
 export default function MainLayout({
   children,
@@ -11,6 +13,7 @@ export default function MainLayout({
       <div className="h-[calc(100vh-56px)] w-full bg-background">
         {children}
       </div>
+      <Toaster richColors />
       <span className="absolute right-4 bottom-4 text-muted">V:0.1</span>
     </div>
   )

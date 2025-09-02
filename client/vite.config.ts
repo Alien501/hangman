@@ -12,6 +12,9 @@ export default defineConfig({
     viteReact(),
     tailwindcss(),
   ],
+  server: {
+    allowedHosts: ['1e95d8aac1fa.ngrok-free.app']
+  },
   test: {
     globals: true,
     environment: 'jsdom',

@@ -211,3 +211,14 @@ code {
   background-color: #7C5547;
   color: #fff;
 }
+
+@media screen and (max-width: 560px){
+  .box-button {
+    width: 44px;
+    font-size: 12px;
+  }
+
+  /* #game-scene-container {
+    height: 300px;
+  } */
+}
