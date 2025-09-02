@@ -142,3 +142,72 @@ code {
     @apply bg-background text-foreground;
   }
 }
+
+/* From Uiverse.io by arthur_6104 */ 
+.box-button {
+  width: 64px;
+  cursor: pointer;
+  border: 4px solid black;
+  background-color: gray;
+  padding-bottom: 10px;
+  transition: 0.1s ease-in-out;
+  user-select: none;
+}
+
+.button {
+  background-color: #dddddd;
+  border: 4px solid #fff;
+  padding: 3px 8px;
+}
+
+.button span {
+  font-size: 1.2em;
+  letter-spacing: 1px;
+}
+
+.box-button:active {
+  padding: 0;
+  margin-bottom: 10px;
+  transform: translateY(10px);
+}
+
+.box-button-tick.active .button {
+  background-color: #ff8079;
+}
+
+.box-button-tick.active {
+  background-color: #D40C00;
+}
+
+.btn-uyir {
+  background-color: #00A5F9;
+}
+
+.btn-uyir .button {
+  background-color: #77d2ff;
+}
+
+.btn-mei {
+  background-color: #32C12C;
+}
+
+.btn-mei .button {
+  background-color: #75fa71;
+}
+
+.btn-mei.pressed {
+  background-color: #FF5500;
+}
+
+.btn-mei.pressed .button {
+  background-color: #FF9A00;
+}
+
+.btn-uyir.pressed {
+  background-color: #50342C;
+}
+
+.btn-uyir.pressed .button {
+  background-color: #7C5547;
+  color: #fff;
+}

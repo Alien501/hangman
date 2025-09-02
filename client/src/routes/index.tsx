@@ -4,6 +4,7 @@ import logo from '../logo.svg'
 import MainLayout from '@/layouts/main-layout'
 import HomeScreen from '@/screens/home-screen'
 import GameScreen from '@/screens/game-screen'
+import { useQuery } from '@tanstack/react-query'
 
 export const Route = createFileRoute('/')({
   component: App,
