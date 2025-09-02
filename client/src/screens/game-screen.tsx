@@ -68,7 +68,7 @@ export default function GameScreen() {
     "ற்": ["ற","றா","றி","றீ","று","றூ","றெ","றே","றை","றொ","றோ","றௌ"],
     "ன்": ["ன","னா","னி","னீ","னு","னூ","னெ","னே","னை","னொ","னோ","னௌ"]
   }
-  
+
   // Function to initialize/reset the scene to its initial state
   const initializeScene = () => {
     gsap.set('#hang-man', { xPercent: 150, yPercent: 52, x: 0, y: 0 })
@@ -298,7 +298,7 @@ export default function GameScreen() {
         setUyirezhuthuPressed(value);
       }
     }else {
-      console.log(uyirEzhuthu[value]);
+      setUserWord(prev => prev);
     }
   }
   
@@ -314,37 +314,34 @@ export default function GameScreen() {
 
   const onConfirmPressed = () => {
     if((meiyezhuthuPressed || meiyezhuthuPressed == 0) && (uyirezhuthuPressed || uyirezhuthuPressed == 0)) {
-      console.log("Meiyezhuthu", meiyezhuthu[meiyezhuthuPressed]);
-      console.log("Uyirezhuthu", uyirEzhuthu[uyirezhuthuPressed]);
-      console.log("Uyirmei", uyirMeiyeazhuthu[meiyezhuthu[meiyezhuthuPressed]][uyirezhuthuPressed]);
+      const ui = uyirMeiyeazhuthu[meiyezhuthu[meiyezhuthuPressed]][uyirezhuthuPressed];
     }else {
-      console.log("Meiyezhuthu", meiyezhuthu[meiyezhuthuPressed]);
+      if(meiyezhuthuPressed == null) return;
+      const ui = meiyezhuthu[meiyezhuthuPressed];
     }
   }
 
   return (
     <div className="h-full w-full flex justify-evenly lg:flex-row flex-col">
-      <div className="h-full w-full flex justify-center items-center bg-blue-200/0">
+      <div className="h-full w-full flex justify-center items-center bg-blue-200/0 relative">
+        <div className="flex flex-col gap-2 absolute top-4">
+          <div className='flex items-center justify-center space-x-2 flex-wrap p-4'>
+            {
+              word?.map(w =>
+              <div className="answer-box shadow-[4px_4px_0px_#000] w-[40px] h-[40px] border-2 border-black p-0.5 flex items-center justify-center relative">
+                <span className='absolute h-[90%] w-[90%] bg-red-400'>{w}</span>
+              </div>)
+            }
+          </div>
+        </div>
         <div
           id="game-scene-container"
-          className="flex justify-center items-center rounded-md overflow-hidden max-h-[360px] max-w-[400px] p-2"
+          className="flex justify-center items-center overflow-hidden max-h-[360px] max-w-[400px] p-2 border-4 border-black shadow-[4px_4px_0px_#000]"
         >
           <InitialScene currentStickMan={currentStickMan} />
         </div>
       </div>
       <div className="h-full w-full p-4 bg-red-200/0 flex justify-center items-center flex-col">
-        <div className="flex flex-col gap-2">
-          User TYped: {userWord}
-          {/* {word? word : <>Loading...</>} */}
-          <div className='flex items-center justify-center space-x-2 flex-wrap p-4'>
-            {
-              word?.map(w => <div className="answer-box w-[40px] h-[40px] border-2 border-stone-400 rounded-sm bg-stone-200 flex items-center justify-center">
-                <span>{w}</span>
-              </div>)
-            }
-            <br />
-          </div>
-        </div>
         <Keyboard
           uyirEzhuthu={uyirEzhuthu}
           meiyezhuthu={meiyezhuthu}
