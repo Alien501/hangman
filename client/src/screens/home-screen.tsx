@@ -1,10 +1,12 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import gsap from 'gsap'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import HowToPlayModal from '@/components/HowToPlayModal'
 
 export default function HomeScreen({ onStart }: { onStart: () => void }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const [showHowToPlay, setShowHowToPlay] = useState(false)
 
   useEffect(() => {
     gsap.set('#sprite-wrapper', {
@@ -53,7 +55,9 @@ export default function HomeScreen({ onStart }: { onStart: () => void }) {
   }, [])
 
   return (
-    <div className="h-full w-full relative font-open-sans">
+    <div
+      className={`h-full w-full relative ${i18n.language.startsWith('ta') ? 'font-noto-tamil' : 'font-noto-sans'}`}
+    >
       <div className="home-scene-container relative h-full w-full">
         <div className="lg:w-[400px] w-[320px] h-[400px] mx-auto border-4 border-black shadow-[4px_4px_0px_#000] absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <p className="font-bold text-5xl text-center absolute left-0 right-0 bottom-0 bg-foreground text-background p-2">
@@ -149,14 +153,28 @@ export default function HomeScreen({ onStart }: { onStart: () => void }) {
           </svg>
         </div>
       </div>
-      <div className="absolute lg:bottom-24 bottom-8  w-full left-0 right-0 top-10">
-        <Button
-          onClick={onStart}
-          className="font-indie flex justify-center items-center mx-auto text-xl block w-[128px] h-[64px] rounded-none leading-tight"
-        >
-          <span>{t('home.start')}</span>
-        </Button>
+      <div className="absolute lg:bottom-24 bottom-8 w-full left-0 right-0 top-10">
+        <div className="flex flex-col items-center gap-3 sm:gap-4">
+          <Button
+            onClick={onStart}
+            className={`${i18n.language.startsWith('ta') ? 'font-noto-tamil' : 'font-indie'} flex justify-center items-center text-lg sm:text-xl w-[120px] sm:w-[128px] h-[56px] sm:h-[64px] rounded-none leading-tight bg-green-400 hover:bg-green-400 text-black border-2 shadow-[4px_4px_0px_#000] hover:shadow-[0px_0px_0px_#000] border-black`}
+          >
+            <span className="text-sm sm:text-lg">{t('home.start')}</span>
+          </Button>
+          <Button
+            onClick={() => setShowHowToPlay(true)}
+            className={`flex justify-center items-center text-sm sm:text-lg h-[44px] sm:h-[48px] rounded-none leading-tight bg-blue-400 hover:bg-blue-400 text-black border-2 shadow-[4px_4px_0px_#000] hover:shadow-[0px_0px_0px_#000] border-black ${i18n.language.startsWith('ta') ? 'font-noto-tamil w-[200px]' : 'font-indie w-[120px] sm:w-[128px]'} `}
+          >
+            <span className="text-xs sm:text-base px-1">
+              {t('howToPlay.title')}
+            </span>
+          </Button>
+        </div>
       </div>
+      <HowToPlayModal
+        isOpen={showHowToPlay}
+        onClose={() => setShowHowToPlay(false)}
+      />
     </div>
   )
 }

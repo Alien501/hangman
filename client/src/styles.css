@@ -19,6 +19,11 @@
   src: url('../public/assets/fonts/open-sans.ttf');
 }
 
+@font-face {
+  font-family: 'Noto Tamil';
+  src: url('../public/assets/fonts/noto-tamil.ttf');
+}
+
 body {
   @apply m-0;
   font-family:
@@ -144,6 +149,7 @@ code {
   --font-indie: 'Indie Flower';
   --font-noto-sans: 'Noto Sans';
   --font-open-sans: 'Open Sans';
+  --font-noto-tamil: 'Noto Tamil';
 }
 
 @layer base {

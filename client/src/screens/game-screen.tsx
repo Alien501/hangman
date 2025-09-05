@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import gsap from 'gsap'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
+import confetti from 'canvas-confetti'
 import {
   ConfusedStickMan,
   DeadStickMan,
@@ -12,90 +13,34 @@ import {
 } from './sprites/stick-mans'
 import InitialScene from './scene'
 import Keyboard from '@/components/keyboard'
+import { Button } from '@/components/ui/button'
+import { getWord } from '@/api/getWord'
+import { meiyezhuthu, uyirEzhuthu, uyirMeiyeazhuthu } from '@/data/letters'
+import SuccessModal from '@/components/SuccessModal'
+
+interface WordData {
+  englishmeaning: string
+  id: number
+  tamilpronounce: string
+  tamilword: string
+}
 
 export default function GameScreen() {
-  // Types for Tamil consonant/vowel composition
-  const uyirEzhuthu = [
-    'அ',
-    'ஆ',
-    'இ',
-    'ஈ',
-    'உ',
-    'ஊ',
-    'எ',
-    'ஏ',
-    'ஐ',
-    'ஒ',
-    'ஓ',
-    'ஔ',
-  ] as const
-  const meiyezhuthu = [
-    'க்',
-    'ங்',
-    'ச்',
-    'ஞ்',
-    'ட்',
-    'ண்',
-    'த்',
-    'ந்',
-    'ப்',
-    'ம்',
-    'ய்',
-    'ர்',
-    'ல்',
-    'வ்',
-    'ழ்',
-    'ள்',
-    'ற்',
-    'ன்',
-  ] as const
-  type MeiKey = (typeof meiyezhuthu)[number]
-  const uyirMeiyeazhuthu: Record<MeiKey, ReadonlyArray<string>> = {
-    க்: ['க', 'கா', 'கி', 'கீ', 'கு', 'கூ', 'கெ', 'கே', 'கை', 'கொ', 'கோ', 'கௌ'],
-    ங்: ['ங', 'ஙா', 'ஙி', 'ஙீ', 'ஙு', 'ஙூ', 'ஙெ', 'ஙே', 'ஙை', 'ஙொ', 'ஙோ', 'ஙௌ'],
-    ச்: ['ச', 'சா', 'சி', 'சீ', 'சு', 'சூ', 'செ', 'சே', 'சை', 'சொ', 'சோ', 'சௌ'],
-    ஞ்: ['ஞ', 'ஞா', 'ஞி', 'ஞீ', 'ஞு', 'ஞூ', 'ஞெ', 'ஞே', 'ஞை', 'ஞொ', 'ஞோ', 'ஞௌ'],
-    ட்: ['ட', 'டா', 'டி', 'டீ', 'டு', 'டூ', 'டெ', 'டே', 'டை', 'டொ', 'டோ', 'டௌ'],
-    ண்: ['ண', 'ணா', 'ணி', 'ணீ', 'ணு', 'ணூ', 'ணெ', 'ணே', 'ணை', 'ணொ', 'ணோ', 'ணௌ'],
-    த்: ['த', 'தா', 'தி', 'தீ', 'து', 'தூ', 'தெ', 'தே', 'தை', 'தொ', 'தோ', 'தௌ'],
-    ந்: ['ந', 'நா', 'நி', 'நீ', 'நு', 'நூ', 'நெ', 'நே', 'நை', 'நொ', 'நோ', 'நௌ'],
-    ப்: ['ப', 'பா', 'பி', 'பீ', 'பு', 'பூ', 'பெ', 'பே', 'பை', 'பொ', 'போ', 'பௌ'],
-    ம்: ['ம', 'மா', 'மி', 'மீ', 'மு', 'மூ', 'மெ', 'மே', 'மை', 'மொ', 'மோ', 'மௌ'],
-    ய்: ['ய', 'யா', 'யி', 'யீ', 'யு', 'யூ', 'யெ', 'யே', 'யை', 'யொ', 'யோ', 'யௌ'],
-    ர்: ['ர', 'ரா', 'ரி', 'ரீ', 'ரு', 'ரூ', 'ரெ', 'ரே', 'ரை', 'ரொ', 'ரோ', 'ரௌ'],
-    ல்: ['ல', 'லா', 'லி', 'லீ', 'லு', 'லூ', 'லெ', 'லே', 'லை', 'லொ', 'லோ', 'லௌ'],
-    வ்: ['வ', 'வா', 'வி', 'வீ', 'வு', 'வூ', 'வெ', 'வே', 'வை', 'வொ', 'வோ', 'வௌ'],
-    ழ்: ['ழ', 'ழா', 'ழி', 'ழீ', 'ழு', 'ழூ', 'ழெ', 'ழே', 'ழை', 'ழொ', 'ழோ', 'ழௌ'],
-    ள்: ['ள', 'ளா', 'ளி', 'ளீ', 'ளு', 'ளூ', 'ளெ', 'ளே', 'ளை', 'ளொ', 'ளோ', 'ளௌ'],
-    ற்: ['ற', 'றா', 'றி', 'றீ', 'று', 'றூ', 'றெ', 'றே', 'றை', 'றொ', 'றோ', 'றௌ'],
-    ன்: ['ன', 'னா', 'னி', 'னீ', 'னு', 'னூ', 'னெ', 'னே', 'னை', 'னொ', 'னோ', 'னௌ'],
-  } as const
-  const getWord = async () => {
-    try {
-      const wordResponse = await fetch('https://api.tamilwords.net/')
-      if (wordResponse.ok) {
-        const data = await wordResponse.json()
-        const segmenter = new Intl.Segmenter('ta', { granularity: 'grapheme' })
-        const segments = segmenter.segment(data[0].tamilword)
-        const graphemes = Array.from(segments, (segment) => segment.segment)
-
-        setWord(graphemes)
-        return data
-      }
-    } catch (error) {
-      console.error(error)
-      return null
-    }
+  const fetchWord = async () => {
+    const fetchedData = await getWord(setWord)
+    setWordData(fetchedData[0])
+    return fetchedData
   }
 
   const { refetch } = useQuery({
     queryKey: ['word'],
-    queryFn: getWord,
+    queryFn: fetchWord,
   })
 
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const [word, setWord] = useState<Array<string> | null>([])
+  const [wordData, setWordData] = useState<WordData | null>(null)
   const [currentStickMan, setCurrentStickMan] = useState(<HappyStickMan />)
   const [currentGameState, setCurrentGameState] = useState<string>('p0')
   const [gamePlayTimeline, setGamePlayTimeline] =
@@ -110,7 +55,9 @@ export default function GameScreen() {
   const [errors, setErrors] = useState<number>(0)
   const [score, setScore] = useState<number>(0)
   const [isGameOver, setIsGameOver] = useState<boolean>(false)
-  console.log(score);
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false)
+  console.log(score)
+
   const getPlayableLength = (arr: Array<string> | null) =>
     arr ? arr.filter((ch) => ch !== ' ').length : 0
 
@@ -203,11 +150,47 @@ export default function GameScreen() {
         setGuessedGraphemes([])
         setMeiyezhuthuPressed(null)
         setUyirezhuthuPressed(null)
-        toast.success('You guessed the word!', {
-          description: 'Fetching a new word...',
-          position: 'top-center',
-        })
-        refetch()
+
+        let end = 10
+        const colors = [
+          '#ff8079',
+          '#d40c00',
+          '#00a5f9',
+          '#77d2ff',
+          '#32c12c',
+          '#75fa71',
+          '#ff5500',
+          '#ff9a00',
+        ]
+
+        ;(function frame() {
+          confetti({
+            particleCount: 20,
+            angle: 60,
+            spread: 45,
+            origin: { x: 0, y: 1 },
+            colors: colors,
+          })
+          confetti({
+            particleCount: 20,
+            angle: 120,
+            spread: 45,
+            origin: { x: 1, y: 1 },
+            colors: colors,
+          })
+          confetti({
+            origin: {
+              y: 1,
+            },
+            spread: 90,
+            particleCount: 30,
+          })
+
+          if (0 < end--) {
+            requestAnimationFrame(frame)
+          }
+        })()
+        setShowSuccessModal(true)
       }
     } else {
       setErrors((prev) => {
@@ -462,13 +445,30 @@ export default function GameScreen() {
   }
 
   const onMeiyezhuthuPressed = (idx: number) => {
-    console.log(idx)
     setUyirezhuthuPressed(null)
     if (meiyezhuthuPressed == idx) {
       setMeiyezhuthuPressed(null)
     } else {
       setMeiyezhuthuPressed(idx)
     }
+  }
+
+  const onHintPressed = () => {
+    toast.warning(t('game.hint'), {
+      description: wordData?.englishmeaning.toUpperCase(),
+      position: 'top-center',
+    })
+  }
+
+  const handleContinueGame = () => {
+    setShowSuccessModal(false)
+    refetch()
+  }
+
+  const handleQuitGame = () => {
+    setShowSuccessModal(false)
+    // Navigate back to home screen
+    window.location.reload()
   }
 
   const onConfirmPressed = () => {
@@ -487,7 +487,9 @@ export default function GameScreen() {
   }
 
   return (
-    <div className="h-full w-full flex justify-evenly lg:flex-row flex-col font-open-sans">
+    <div
+      className={`h-full w-full flex justify-evenly lg:flex-row flex-col ${i18n.language.startsWith('ta') ? 'font-noto-tamil' : 'font-open-sans'} relative`}
+    >
       <div className="h-full w-full flex justify-center items-center bg-blue-200/0 relative">
         <div className="flex flex-col gap-2 absolute top-4 lg:top-10 z-10">
           <div className="flex items-center justify-center space-x-2 flex-wrap p-4">
@@ -500,9 +502,9 @@ export default function GameScreen() {
                   className="answer-box shadow-[4px_4px_0px_#000] w-[clamp(28px,8vw,44px)] h-[clamp(28px,8vw,44px)] border-2 border-black p-0.5 flex items-center justify-center relative"
                 >
                   <span
-                    className={`absolute h-[90%] w-[90%] text-[clamp(12px,5vw,22px)] font-semibold ${guessedGraphemes.includes(w) ? 'bg-green-400' : 'bg-red-400'}`}
+                    className={`absolute h-[90%] w-[90%] text-sm font-semibold ${guessedGraphemes.includes(w) ? 'bg-green-400' : 'bg-red-400'} flex items-center justify-center`}
                   >
-                    {guessedGraphemes.includes(w) ? w : ''}
+                    <span>{guessedGraphemes.includes(w) ? w : ''}</span>
                   </span>
                 </div>
               ),
@@ -513,6 +515,30 @@ export default function GameScreen() {
           id="game-scene-container"
           className="relative z-0 flex justify-center items-center overflow-hidden w-full max-w-[420px] aspect-square p-2 border-4 border-black shadow-[4px_4px_0px_#000]"
         >
+          <div className="hint-button-wrapper absolute bottom-2 left-2 z-10">
+            <Button
+              onClick={onHintPressed}
+              className="rounded-none bg-orange-400 text-black border-2 border-black shadow-[4px_4px_0px_#000] hover:shadow-[0px_0px_0px_#000] hover:bg-orange-600"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-bulb"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M3 12h1m8 -9v1m8 8h1m-15.4 -6.4l.7 .7m12.1 -.7l-.7 .7" />
+                <path d="M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0 -1 3a2 2 0 0 1 -4 0a3.5 3.5 0 0 0 -1 -3" />
+                <path d="M9.7 17l4.6 0" />
+              </svg>
+            </Button>
+          </div>
           <div className="absolute right-2 lg:top-1 bg-green-300 border-3 shadow-[4px_4px_0px_#000] border-black py-2 px-2 font-bold">
             {word
               ? `${t('game.moves')}: ${errors}/${getPlayableLength(word) + 1}`
@@ -547,6 +573,12 @@ export default function GameScreen() {
           </div>
         )}
       </div>
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onContinue={handleContinueGame}
+        onQuit={handleQuitGame}
+        wordData={wordData}
+      />
     </div>
   )
 }
