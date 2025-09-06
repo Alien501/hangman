@@ -5,9 +5,7 @@ import { config } from '../config/environment';
 export const securityMiddleware = [
   // Helmet for security headers
   helmet({
-    contentSecurityPolicy: config.security.helmetCspEnabled
-      ? undefined
-      : false,
+    contentSecurityPolicy: config.security.helmetCspEnabled ? undefined : false,
     crossOriginEmbedderPolicy: false,
   }),
 

@@ -21,7 +21,7 @@ export class CustomError extends Error implements AppError {
 export const errorHandler = (
   error: AppError,
   req: Request,
-  res: Response,
+  res: Response
 ): void => {
   const { statusCode = 500, message } = error;
 

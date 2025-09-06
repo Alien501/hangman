@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import healthRouter from './health';
+import wordsRouter from './words';
 
 const router = Router();
 
 // Mount routes
 router.use('/health', healthRouter);
 
-// API routes will be added here
-// router.use('/games', gamesRouter);
-// router.use('/words', wordsRouter);
+// Routes
+router.use('/word', wordsRouter);
 
 export default router;

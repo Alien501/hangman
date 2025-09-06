@@ -1,4 +1,4 @@
-import express, {Request, Response} from 'express';
+import express, { Request, Response } from 'express';
 import compression from 'compression';
 import cors from 'cors';
 
@@ -26,8 +26,7 @@ app.use(securityMiddleware);
 app.use('/api', apiRouter);
 
 // Root endpoint
-app.get('/', (req: Request, res: Response) => {
-  console.log(req.url);
+app.get('/', (_req: Request, res: Response) => {
   res.json({
     message: 'Hangman API Server',
     version: '1.0.0',
