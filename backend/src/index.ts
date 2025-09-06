@@ -39,29 +39,31 @@ app.get('/', (_req: Request, res: Response) => {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Start server
-const server = app.listen(config.port, () => {
-  console.log(`🚀 Server running on port ${config.port}`);
-  console.log(`📊 Environment: ${config.nodeEnv}`);
-  console.log(`🌐 CORS Origin: ${config.cors.origin}`);
-  console.log(`⏰ Started at: ${new Date().toISOString()}`);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    console.log('Process terminated');
-    process.exit(0);
+// Start server only if not in Vercel environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  const server = app.listen(config.port, () => {
+    console.log(`🚀 Server running on port ${config.port}`);
+    console.log(`📊 Environment: ${config.nodeEnv}`);
+    console.log(`🌐 CORS Origin: ${config.cors.origin}`);
+    console.log(`⏰ Started at: ${new Date().toISOString()}`);
   });
-});
 
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
-  server.close(() => {
-    console.log('Process terminated');
-    process.exit(0);
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully');
+    server.close(() => {
+      console.log('Process terminated');
+      process.exit(0);
+    });
   });
-});
+
+  process.on('SIGINT', () => {
+    console.log('SIGINT received, shutting down gracefully');
+    server.close(() => {
+      console.log('Process terminated');
+      process.exit(0);
+    });
+  });
+}
 
 export default app;
