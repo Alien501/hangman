@@ -1,4 +1,4 @@
-import { wordList, Word } from '@src/data/words';
+import { wordList, Word } from '../data/words';
 import { Router, Response, Request } from 'express';
 
 const router = Router();
