@@ -17,18 +17,12 @@ import { Button } from '@/components/ui/button'
 import { getWord } from '@/api/getWord'
 import { meiyezhuthu, uyirEzhuthu, uyirMeiyeazhuthu } from '@/data/letters'
 import SuccessModal from '@/components/SuccessModal'
-
-interface WordData {
-  englishmeaning: string
-  id: number
-  tamilpronounce: string
-  tamilword: string
-}
+import type { Word } from '@/types/api'
 
 export default function GameScreen() {
   const fetchWord = async () => {
     const fetchedData = await getWord(setWord)
-    setWordData(fetchedData[0])
+    setWordData(fetchedData)
     return fetchedData
   }
 
@@ -40,7 +34,7 @@ export default function GameScreen() {
   const { i18n, t } = useTranslation()
 
   const [word, setWord] = useState<Array<string> | null>([])
-  const [wordData, setWordData] = useState<WordData | null>(null)
+  const [wordData, setWordData] = useState<Word | null>(null)
   const [currentStickMan, setCurrentStickMan] = useState(<HappyStickMan />)
   const [currentGameState, setCurrentGameState] = useState<string>('p0')
   const [gamePlayTimeline, setGamePlayTimeline] =
@@ -455,7 +449,7 @@ export default function GameScreen() {
 
   const onHintPressed = () => {
     toast.warning(t('game.hint'), {
-      description: wordData?.englishmeaning.toUpperCase(),
+      description: wordData?.meaning.toUpperCase(),
       position: 'top-center',
     })
   }

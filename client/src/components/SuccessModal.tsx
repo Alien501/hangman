@@ -1,16 +1,13 @@
 import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
+import type { Word } from '@/types/api'
 
 interface SuccessModalProps {
   isOpen: boolean
   onContinue: () => void
   onQuit: () => void
-  wordData?: {
-    tamilword: string
-    englishmeaning: string
-    tamilpronounce: string
-  } | null
+  wordData?: Word | null
 }
 
 export default function SuccessModal({
@@ -56,13 +53,13 @@ export default function SuccessModal({
             {wordData && (
               <div className="bg-white border-2 border-black shadow-[3px_3px_0px_#000] p-2 sm:p-3 space-y-1">
                 <p className="text-lg sm:text-xl font-bold text-black">
-                  {wordData.tamilword}
+                  {wordData.word}
                 </p>
                 <p className="text-xs sm:text-sm text-gray-700">
-                  {wordData.englishmeaning}
+                  {wordData.meaning}
                 </p>
                 <p className="text-xs text-gray-600">
-                  {wordData.tamilpronounce}
+                  {wordData.pronouncination}
                 </p>
               </div>
             )}
